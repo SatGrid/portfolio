@@ -288,43 +288,74 @@
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: #04030a;
+    background: radial-gradient(ellipse at 50% 40%, #0d0a18 0%, #04030a 65%);
     opacity: 0;
     pointer-events: none;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    will-change: opacity;
+    transition: opacity 0.7s cubic-bezier(.4,0,.2,1);
   }
   .reality-break.active {
     opacity: 1;
     pointer-events: auto;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.18s ease-out;
   }
-  .reality-break .burst{
+  .reality-break .nebula{
     position:absolute;
-    inset:-60%;
-    background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.045) 0deg 0.6deg, transparent 0.6deg 5.5deg);
+    inset:-15%;
+    background:
+      radial-gradient(ellipse at 28% 32%, rgba(130,90,220,0.4), transparent 55%),
+      radial-gradient(ellipse at 72% 60%, rgba(60,150,215,0.32), transparent 55%),
+      radial-gradient(ellipse at 48% 82%, rgba(210,95,165,0.24), transparent 60%);
+    filter: blur(6px);
+    opacity: 0;
+    transition: opacity 1.8s ease;
+  }
+  .reality-break.active .nebula{ opacity: 0.85; }
+  .reality-break .starfield{
+    position:absolute;
+    top:50%;
+    left:50%;
+    background:transparent;
     opacity:0;
-    transform: scale(0.25) rotate(0deg);
-    transition: opacity 1.4s ease, transform 3.2s cubic-bezier(.15,.65,.25,1);
+    transition: opacity 0.9s ease;
+    will-change: opacity, transform;
   }
-  .reality-break.active .burst{
-    opacity:0.55;
-    transform: scale(2.4) rotate(28deg);
+  .reality-break.active .starfield{
+    opacity:1;
+    animation: star-drift 3.6s ease-out forwards;
   }
-  .reality-break .grain{
-    position:absolute;
-    inset:0;
-    opacity:0.35;
-    background-image:
-      radial-gradient(1px 1px at 12% 38%, rgba(255,255,255,0.16), transparent),
-      radial-gradient(1px 1px at 63% 18%, rgba(255,255,255,0.13), transparent),
-      radial-gradient(1px 1px at 38% 78%, rgba(255,255,255,0.11), transparent),
-      radial-gradient(1px 1px at 84% 62%, rgba(255,255,255,0.14), transparent),
-      radial-gradient(1px 1px at 22% 92%, rgba(255,255,255,0.1), transparent),
-      radial-gradient(1px 1px at 92% 30%, rgba(255,255,255,0.12), transparent);
-    background-size: 5px 5px;
+  @keyframes star-drift{
+    from{ transform:translateY(0) scale(1); }
+    to{ transform:translateY(-34px) scale(1.03); }
+  }
+  .reality-break .msg{
+    position:relative;
+    z-index:3;
+    color:#fdfaf2;
+    font-family:'Special Elite', monospace;
+    font-size:clamp(19px, 4vw, 30px);
+    text-align:center;
+    letter-spacing:0.05em;
+    opacity:0;
+    transform:scale(0.92);
+    transition: opacity 1s ease 0.35s, transform 1s ease 0.35s;
+    text-shadow: 0 0 18px rgba(255,255,255,0.5), 0 0 46px rgba(150,120,255,0.4);
+  }
+  .reality-break.active .msg{
+    opacity:1;
+    transform:scale(1);
+  }
+  .reality-break .msg .sub{
+    display:block;
+    font-size:0.55em;
+    opacity:0.75;
+    margin-top:10px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
   }
   .reality-break .flash {
     position: absolute;
@@ -796,7 +827,7 @@
       title: "Contact",
       body: `<p>Always up for talking ML, internships, or a good movie recommendation.</p>`,
       links: [
-        ["Email", "mailto:satyamchauhan0322@gmail.com"],
+        ["Email", "https://mail.google.com/mail/?view=cm&fs=1&to=satyamchauhan0322@gmail.com"],
         ["GitHub", "https://github.com/SatGrid"],
         ["LinkedIn", "https://www.linkedin.com/in/satyam-chauhan-510326362/"]
       ]
@@ -1288,6 +1319,15 @@
   function playGlitchTick(){
     playNoiseClick(0.04, 0.12, 4200);
   }
+  function generateStarShadows(count, spread){
+    const shadows = [];
+    for(let i = 0; i < count; i++){
+      const x = (Math.random() * spread - spread / 2).toFixed(1);
+      const y = (Math.random() * spread - spread / 2).toFixed(1);
+      shadows.push(`${x}px ${y}px #fff`);
+    }
+    return shadows.join(', ');
+  }
 
   function triggerTheWorld(){
     if(isHeaven) return;
@@ -1365,8 +1405,24 @@
 
       const reset = document.createElement('div');
       reset.className = 'reality-break';
-      reset.innerHTML = `<div class="burst"></div><div class="grain"></div><div class="flash"></div>`;
+      reset.innerHTML = `
+        <div class="nebula"></div>
+        <div class="starfield" id="stars-far"></div>
+        <div class="starfield" id="stars-near"></div>
+        <div class="msg mono">UNIVERSAL RESET<span class="sub">Made in Heaven</span></div>
+        <div class="flash"></div>
+      `;
       document.body.appendChild(reset);
+
+      const starsFar = reset.querySelector('#stars-far');
+      const starsNear = reset.querySelector('#stars-near');
+      starsFar.style.width = '1px';
+      starsFar.style.height = '1px';
+      starsFar.style.boxShadow = generateStarShadows(160, 1400);
+      starsNear.style.width = '2px';
+      starsNear.style.height = '2px';
+      starsNear.style.boxShadow = generateStarShadows(70, 1400);
+
       requestAnimationFrame(()=> reset.classList.add('active'));
       playCymbalHit();
 
@@ -1377,7 +1433,6 @@
         setTimeout(()=> flash.style.opacity = '0', 220);
       }, 120);
 
-      reset.dataset.el = 'active';
       window.__realityBreakEl = reset;
     }
 
@@ -1393,7 +1448,7 @@
           isHeaven = false;
           currentWorldTrack = null;
           showEggToast('▶ New universe. Tapes restored.');
-        }, 600);
+        }, 780);
       } else {
         isHeaven = false;
         currentWorldTrack = null;
