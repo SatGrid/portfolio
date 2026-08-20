@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Satyam Chauhan — Mixtape</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&family=Libre+Franklin:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDE4D2;
+    --paper-dark:#E1D3B4;
+    --ink:#2B2620;
+    --rust:#B5533C;
+    --olive:#6E7350;
+    --denim:#4C6272;
+    --mustard:#B98A34;
+    --line: rgba(43,38,32,0.18);
+    --line-soft: rgba(43,38,32,0.08);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  body{
+    background:var(--paper);
+    background-image:
+      radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.35), transparent 55%),
+      radial-gradient(ellipse at center, transparent 55%, rgba(43,38,32,0.07) 100%),
+      repeating-linear-gradient(0deg, rgba(43,38,32,0.02) 0px, transparent 1px, transparent 2px),
+      repeating-linear-gradient(90deg, rgba(43,38,32,0.015) 0px, transparent 1px, transparent 2px);
+    color:var(--ink);
+    font-family:'Libre Franklin', sans-serif;
+    min-height:100vh;
+  }
+
+  a{color:inherit;}
+
+  .type{font-family:'Special Elite', monospace;}
+  .mono{font-family:'Courier Prime', monospace;}
+
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    padding:0 24px;
+  }
+
+  /* ===== HEADER ===== */
+  header{
+    padding:50px 0 34px;
+    border-bottom:2px solid var(--ink);
+  }
+  header .top-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:16px;
+  }
+  h1.type{
+    font-size:clamp(30px, 5vw, 44px);
+    letter-spacing:-0.01em;
+  }
+  .stamp{
+    font-family:'Courier Prime', monospace;
+    font-size:12px;
+    border:1px solid var(--ink);
+    padding:4px 10px;
+    transform:rotate(-2deg);
+    white-space:nowrap;
+  }
+  header p.lead{
+    margin-top:14px;
+    max-width:60ch;
+    color:var(--ink);
+    opacity:0.75;
+    font-size:15px;
+  }
+  header .hint{
+    margin-top:10px;
+    font-family:'Courier Prime', monospace;
+    font-size:12px;
+    opacity:0.6;
+  }
+
+  /* ===== SHELF GRID ===== */
+  main{
+    padding:36px 0 60px;
+  }
+  .shelf{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));
+    gap:22px;
+    perspective:1200px;
+  }
+
+  /* ===== CASSETTE ===== */
+  .tape{
+    border:1px solid var(--ink);
+    box-shadow:3px 3px 0 var(--ink), 0 10px 18px rgba(43,38,32,0.18);
+    cursor:pointer;
+    text-align:left;
+    color:var(--ink);
+    font-family:inherit;
+    padding:0;
+    background:none;
+    transition:transform 0.12s ease-out, box-shadow 0.12s ease-out;
+    position:relative;
+    transform-style:preserve-3d;
+    will-change:transform;
+  }
+  .tape.picked{
+    transition:transform 0.34s cubic-bezier(.34,1.56,.64,1), box-shadow 0.34s ease;
+    transform:translateZ(70px) scale(1.1) rotateX(4deg) !important;
+    box-shadow:3px 3px 0 var(--ink), 0 40px 46px rgba(43,38,32,0.35) !important;
+  }
+
+  /* 3D box faces: front (real content), right + top edges (pure depth cues) */
+  .tape .face.front{
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.32), rgba(255,255,255,0) 38%),
+      linear-gradient(to bottom, transparent 55%, rgba(0,0,0,0.16)),
+      var(--case-color, var(--olive));
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    transform:translateZ(5px);
+    position:relative;
+    overflow:hidden;
+  }
+  .tape .gloss{
+    position:absolute;
+    inset:0;
+    background:radial-gradient(220px circle at var(--gx,50%) var(--gy,10%), rgba(255,255,255,0.65), transparent 60%);
+    mix-blend-mode:overlay;
+    opacity:0;
+    transition:opacity 0.25s ease;
+    pointer-events:none;
+  }
+  .tape:hover .gloss{opacity:1;}
+  .tape .face.right{
+    position:absolute;
+    top:0;
+    right:0;
+    width:10px;
+    height:100%;
+    background:color-mix(in srgb, var(--case-color, var(--olive)) 100%, black 32%);
+    transform-origin:right center;
+    transform:rotateY(-90deg);
+  }
+  .tape .face.top{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:10px;
+    background:color-mix(in srgb, var(--case-color, var(--olive)) 100%, white 35%);
+    transform-origin:top center;
+    transform:rotateX(90deg);
+  }
+
+  .reel-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 6px;
+  }
+  .reel{
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    border:2px solid var(--ink);
+    background:radial-gradient(circle at 35% 35%, var(--paper), var(--paper-dark) 70%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:transform 0.6s ease;
+  }
+  .tape:hover .reel{
+    animation:spin 2.2s linear infinite;
+  }
+  @keyframes spin{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
+  }
+  @keyframes spin-reverse{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(-360deg);}
+  }
+  .tape.rewinding .reel{
+    animation: spin-reverse 0.55s linear infinite !important;
+  }
+  .tape.rewinding .label{
+    transition: transform 0.4s ease;
+    transform: rotate(180deg) !important;
+  }
+  .tape.rewinding .side{
+    transition: opacity 0.3s ease;
+    opacity: 0.3;
+  }
+
+  /* When in rewind mode, also flip the open sleeve content */
+  body.rewind-mode .sleeve{
+    transform: rotate(180deg) !important;
+    transition: transform 0.45s cubic-bezier(.2,.8,.3,1);
+  }
+  body.rewind-mode .overlay.open .sleeve{
+    transform: rotate(180deg) !important;
+  }
+  /* Keep the mini player controls readable by counter-rotating them */
+  body.rewind-mode .sleeve-top,
+  body.rewind-mode .mini-reels{
+    transform: rotate(180deg);
+  }
+
+  /* ===== MADE IN HEAVEN / THE WORLD ===== */
+  @keyframes chaos-spin {
+    0%   { transform: rotate(0deg) scale(1) translateY(0); }
+    25%  { transform: rotate(180deg) scale(1.08) translateY(-8px); }
+    50%  { transform: rotate(360deg) scale(0.95) translateY(6px); }
+    75%  { transform: rotate(540deg) scale(1.12) translateY(-4px); }
+    100% { transform: rotate(720deg) scale(1) translateY(0); }
+  }
+  @keyframes chaos-reel {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(1440deg); }
+  }
+  body.heaven-mode .tape {
+    animation-name: chaos-spin;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    pointer-events: none;
+  }
+  body.heaven-mode .tape .reel {
+    animation-name: chaos-reel;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  body.heaven-mode .shelf,
+  body.heaven-mode header,
+  body.heaven-mode footer {
+    animation: shelf-shake 0.1s linear infinite;
+  }
+  @keyframes shelf-shake {
+    0%, 100% { transform: translate(0,0); }
+    25% { transform: translate(var(--shake-amp, 0px), calc(var(--shake-amp, 0px) * -0.6)); }
+    50% { transform: translate(calc(var(--shake-amp, 0px) * -1), var(--shake-amp, 0px)); }
+    75% { transform: translate(calc(var(--shake-amp, 0px) * 0.6), calc(var(--shake-amp, 0px) * 0.8)); }
+  }
+
+  /* Dread vignette — darkens/reddens as the buildup escalates */
+  .dread-vignette{
+    position:fixed;
+    inset:0;
+    z-index:140;
+    pointer-events:none;
+    opacity:0;
+    background:radial-gradient(ellipse at center, transparent 35%, rgba(20,4,4,0.75) 100%);
+  }
+
+  /* Freeze halt: everything stops dead, desaturates, dims — no motion, no text */
+  body.frozen-frame *{
+    animation-play-state: paused !important;
+  }
+  body.frozen-frame{
+    filter: grayscale(0.6) contrast(1.14) brightness(0.9);
+  }
+  .freeze-glitch{
+    position:fixed;
+    inset:0;
+    z-index:142;
+    pointer-events:none;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, transparent 1px, transparent 2px);
+    opacity:0;
+    mix-blend-mode:overlay;
+  }
+  .freeze-glitch.pulse{
+    animation: glitch-pulse 0.18s steps(2, end) 2;
+  }
+  @keyframes glitch-pulse{
+    0%, 100%{opacity:0; transform:translateX(0);}
+    50%{opacity:0.5; transform:translateX(-2px);}
+  }
+
+  /* Reality-break reset: dark, restrained, no cartoon starfield or banner text */
+  .reality-break {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #04030a;
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .reality-break.active {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.5s ease;
+  }
+  .reality-break .burst{
+    position:absolute;
+    inset:-60%;
+    background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.045) 0deg 0.6deg, transparent 0.6deg 5.5deg);
+    opacity:0;
+    transform: scale(0.25) rotate(0deg);
+    transition: opacity 1.4s ease, transform 3.2s cubic-bezier(.15,.65,.25,1);
+  }
+  .reality-break.active .burst{
+    opacity:0.55;
+    transform: scale(2.4) rotate(28deg);
+  }
+  .reality-break .grain{
+    position:absolute;
+    inset:0;
+    opacity:0.35;
+    background-image:
+      radial-gradient(1px 1px at 12% 38%, rgba(255,255,255,0.16), transparent),
+      radial-gradient(1px 1px at 63% 18%, rgba(255,255,255,0.13), transparent),
+      radial-gradient(1px 1px at 38% 78%, rgba(255,255,255,0.11), transparent),
+      radial-gradient(1px 1px at 84% 62%, rgba(255,255,255,0.14), transparent),
+      radial-gradient(1px 1px at 22% 92%, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 92% 30%, rgba(255,255,255,0.12), transparent);
+    background-size: 5px 5px;
+  }
+  .reality-break .flash {
+    position: absolute;
+    inset: 0;
+    background: #fdfaf2;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .reel::before{
+    content:"";
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--ink);
+  }
+  .tape-window{
+    flex:1;
+    height:2px;
+    background:var(--ink);
+    margin:0 10px;
+    opacity:0.5;
+  }
+
+  .label{
+    background:var(--paper);
+    border:1px solid var(--ink);
+    padding:10px 12px;
+    transform:rotate(var(--tilt, -1deg));
+    box-shadow:1px 1px 0 rgba(43,38,32,0.15);
+  }
+  .label .num{
+    font-family:'Courier Prime', monospace;
+    font-size:11px;
+    opacity:0.6;
+  }
+  .label h3.type{
+    font-size:18px;
+    margin-top:4px;
+    line-height:1.15;
+  }
+
+  .tape .side{
+    font-family:'Courier Prime', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    opacity:0.75;
+  }
+
+  /* case color variants */
+  .tape.c-rust{--case-color:#C97A62;}
+  .tape.c-olive{--case-color:#8B9270;}
+  .tape.c-denim{--case-color:#7C93A0;}
+  .tape.c-mustard{--case-color:#D3A65C;}
+  .tape.c-plum{--case-color:#9C7C93;}
+  .tape.c-sage{--case-color:#A3AD8C;}
+
+  /* ===== MODAL ===== */
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(43,38,32,0.55);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    z-index:100;
+    opacity:0;
+    pointer-events:none;
+    perspective:1400px;
+    transition:opacity 0.2s ease;
+  }
+  .overlay.open{
+    opacity:1;
+    pointer-events:auto;
+  }
+  .sleeve{
+    width:100%;
+    max-width:520px;
+    max-height:85vh;
+    overflow-y:auto;
+    background:var(--paper);
+    border:2px solid var(--ink);
+    box-shadow:6px 6px 0 var(--ink), 0 40px 60px rgba(43,38,32,0.35);
+    position:relative;
+    transform:rotateX(-14deg) translateY(24px) scale(0.94);
+    transform-origin:top center;
+    transition:transform 0.32s cubic-bezier(.2,.8,.3,1);
+  }
+  .overlay.open .sleeve{transform:rotateX(0deg) translateY(0) scale(1);}
+
+  .sleeve-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 20px;
+    border-bottom:1px dashed var(--ink);
+  }
+  .sleeve-top span{
+    font-family:'Courier Prime', monospace;
+    font-size:12px;
+    opacity:0.6;
+  }
+  .sleeve-close{
+    background:none;
+    border:1px solid var(--ink);
+    color:var(--ink);
+    font-family:'Courier Prime', monospace;
+    font-size:13px;
+    padding:4px 10px;
+    cursor:pointer;
+  }
+  .sleeve-close:hover{background:var(--ink); color:var(--paper);}
+
+  .sleeve-body{
+    padding:26px 28px 32px;
+  }
+  .sleeve-body .side-label{
+    font-family:'Courier Prime', monospace;
+    font-size:12px;
+    opacity:0.6;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .sleeve-body h2.type{
+    font-size:30px;
+    margin:8px 0 16px;
+    line-height:1.1;
+  }
+  .sleeve-body .body-text p{
+    font-size:15.5px;
+    line-height:1.7;
+    margin-bottom:12px;
+    opacity:0.9;
+  }
+  .sleeve-body .body-text p:last-child{margin-bottom:0;}
+
+  .group{margin:18px 0;}
+  .group-label{
+    font-family:'Courier Prime', monospace;
+    font-size:12px;
+    opacity:0.6;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin-bottom:8px;
+    display:block;
+  }
+  .tag-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .tag-row span{
+    font-family:'Courier Prime', monospace;
+    font-size:12.5px;
+    border:1px solid var(--ink);
+    padding:3px 9px;
+  }
+  .fact-list{list-style:none; margin-top:6px;}
+  .fact-list li{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:9px 0;
+    border-bottom:1px dashed var(--line);
+    font-size:14.5px;
+  }
+  .fact-list li span:first-child{
+    font-family:'Courier Prime', monospace;
+    font-size:11.5px;
+    opacity:0.6;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .timeline{margin-top:6px;}
+  .timeline-item{
+    padding:16px 0;
+    border-bottom:1px dashed var(--line);
+  }
+  .timeline-item:last-child{border-bottom:none; padding-bottom:0;}
+  .timeline-item:first-child{padding-top:0;}
+  .timeline-year{
+    font-family:'Courier Prime', monospace;
+    font-size:12px;
+    opacity:0.6;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+  }
+  .timeline-item h4{
+    font-family:'Special Elite', monospace;
+    font-size:17px;
+    margin:6px 0 3px;
+    line-height:1.25;
+  }
+  .timeline-place{
+    font-size:14px;
+    opacity:0.75;
+    line-height:1.4;
+  }
+  .cta-row{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:20px;
+  }
+  .cta-row a{
+    font-family:'Courier Prime', monospace;
+    font-size:13.5px;
+    border:1px solid var(--ink);
+    padding:8px 14px;
+    display:inline-block;
+  }
+  .cta-row a:hover{background:var(--ink); color:var(--paper);}
+  .note{
+    margin-top:16px;
+    font-family:'Courier Prime', monospace;
+    font-size:12.5px;
+    opacity:0.65;
+    border-left:2px solid var(--rust);
+    padding-left:10px;
+  }
+
+  footer{
+    text-align:center;
+    padding:30px 20px 46px;
+    font-family:'Courier Prime', monospace;
+    font-size:12px;
+    opacity:0.55;
+  }
+
+  /* ===== VU METER ===== */
+  .vu-meter{
+    display:flex;
+    align-items:flex-end;
+    gap:2px;
+    height:16px;
+    padding:0 2px;
+  }
+  .vu-meter span{
+    width:3px;
+    height:20%;
+    background:var(--ink);
+    opacity:0.45;
+    transition:height 0.09s ease;
+  }
+
+  /* ===== DRAG STATE ===== */
+  .tape[draggable="true"]{cursor:grab;}
+  .tape.dragging{opacity:0.35;}
+
+  /* ===== IDLE WIGGLE ===== */
+  @keyframes wiggle{
+    0%, 100%{transform:translateZ(5px) rotate(0deg);}
+    25%{transform:translateZ(5px) rotate(-1.6deg);}
+    75%{transform:translateZ(5px) rotate(1.6deg);}
+  }
+  .face.front.idle-wiggle{animation:wiggle 0.6s ease-in-out;}
+
+  /* ===== MINI PLAYER (inside modal) ===== */
+  .mini-reels{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 20px;
+    border-bottom:1px dashed var(--ink);
+    opacity:0.85;
+  }
+  .reel.mini{width:18px; height:18px;}
+  .reel.mini::before{width:5px; height:5px;}
+  .player-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  /* ===== EASTER EGG TOAST ===== */
+  .egg-toast{
+    position:fixed;
+    left:50%;
+    bottom:30px;
+    transform:translate(-50%, 16px);
+    background:var(--ink);
+    color:var(--paper);
+    font-size:13px;
+    padding:12px 20px;
+    border:1px solid var(--ink);
+    box-shadow:4px 4px 0 rgba(43,38,32,0.35);
+    opacity:0;
+    transition:opacity 0.3s ease, transform 0.3s ease;
+    z-index:200;
+    max-width:90vw;
+    text-align:center;
+  }
+  .egg-toast.show{
+    opacity:1;
+    transform:translate(-50%, 0);
+  }
+  .flicker-flash{
+    position:fixed;
+    inset:0;
+    background:var(--paper);
+    z-index:150;
+    opacity:0;
+    pointer-events:none;
+    animation:flicker-anim 0.35s ease;
+  }
+  @keyframes flicker-anim{
+    0%{opacity:0;} 15%{opacity:0.85;} 30%{opacity:0.1;} 45%{opacity:0.7;} 100%{opacity:0;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .tape, .sleeve, .overlay, .reel, .face, .face.front.idle-wiggle, .flicker-flash{transition:none; animation:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="top-row">
+      <h1 class="type">SATYAM CHAUHAN — MIXTAPE</h1>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <div class="vu-meter" id="vu-meter" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <button id="mute-toggle" class="stamp mono" style="cursor:pointer; background:var(--paper);" aria-pressed="false">♪ SOUND: ON</button>
+        <button id="side-toggle" class="stamp mono" style="cursor:pointer; background:var(--paper);">SIDE A · 2026</button>
+      </div>
+    </div>
+    <p class="lead">A shelf of tapes instead of a resume. Pick one up, press play.</p>
+    <p class="hint">click to play · drag to rearrange</p>
+  </header>
+
+  <main>
+    <div class="shelf" id="shelf">
+
+      <button class="tape c-rust" data-item="about">
+        <div class="reel-row"><span class="reel"></span><span class="tape-window"></span><span class="reel"></span></div>
+        <div class="label" style="--tilt:-1.2deg;">
+          <span class="num mono">01</span>
+          <h3 class="type">About Me</h3>
+        </div>
+        <span class="side mono">Side A</span>
+      </button>
+
+      <button class="tape c-denim" data-item="skills">
+        <div class="reel-row"><span class="reel"></span><span class="tape-window"></span><span class="reel"></span></div>
+        <div class="label" style="--tilt:0.8deg;">
+          <span class="num mono">02</span>
+          <h3 class="type">Skills</h3>
+        </div>
+        <span class="side mono">Side A</span>
+      </button>
+
+      <button class="tape c-mustard" data-item="education">
+        <div class="reel-row"><span class="reel"></span><span class="tape-window"></span><span class="reel"></span></div>
+        <div class="label" style="--tilt:-0.6deg;">
+          <span class="num mono">03</span>
+          <h3 class="type">Education</h3>
+        </div>
+        <span class="side mono">Side B</span>
+      </button>
+
+      <button class="tape c-sage" data-item="hobbies">
+        <div class="reel-row"><span class="reel"></span><span class="tape-window"></span><span class="reel"></span></div>
+        <div class="label" style="--tilt:1.1deg;">
+          <span class="num mono">04</span>
+          <h3 class="type">Hobbies</h3>
+        </div>
+        <span class="side mono">Side B</span>
+      </button>
+
+      <button class="tape c-plum" data-item="resume">
+        <div class="reel-row"><span class="reel"></span><span class="tape-window"></span><span class="reel"></span></div>
+        <div class="label" style="--tilt:-0.9deg;">
+          <span class="num mono">05</span>
+          <h3 class="type">Résumé</h3>
+        </div>
+        <span class="side mono">Bonus</span>
+      </button>
+
+      <button class="tape c-olive" data-item="contact">
+        <div class="reel-row"><span class="reel"></span><span class="tape-window"></span><span class="reel"></span></div>
+        <div class="label" style="--tilt:0.5deg;">
+          <span class="num mono">06</span>
+          <h3 class="type">Contact</h3>
+        </div>
+        <span class="side mono">Side A</span>
+      </button>
+
+    </div>
+  </main>
+
+  <footer>© 2026 SATYAM CHAUHAN — REWIND BEFORE RETURNING</footer>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="sleeve" role="dialog" aria-modal="true" aria-labelledby="sleeve-title">
+    <div class="sleeve-top">
+      <div class="player-row">
+        <span class="mono" id="play-state-label">▶ PLAYING · <span id="tape-counter">0000</span></span>
+        <div style="display:flex; gap:8px;">
+          <button class="sleeve-close mono" id="play-pause-btn">⏸ PAUSE</button>
+          <button class="sleeve-close mono" id="sleeve-close">✕ EJECT</button>
+        </div>
+      </div>
+    </div>
+    <div class="mini-reels">
+      <span class="reel mini" id="mini-reel-1"></span>
+      <span class="tape-window" style="flex:1;"></span>
+      <span class="reel mini" id="mini-reel-2"></span>
+    </div>
+    <div class="sleeve-body" id="sleeve-body">
+      <!-- injected by JS -->
+    </div>
+  </div>
+</div>
+
+<script>
+  const data = {
+    about: {
+      side: "Track 01",
+      title: "About Me",
+      body: `<p>I'm Satyam Chauhan, currently working through a Bachelor's in Artificial Intelligence — which sounds impressive until you realize I'm still learning to make Python do what I actually mean. What hooked me wasn't a lecture, it was the first time a program I wrote gave me an output I hadn't explicitly told it to produce. That small moment of "wait, how did it know that" is basically the whole reason I'm chasing machine learning now. I'm early in the playlist, not the finished album — but that's exactly where I want to be right now: building, breaking things, and getting a little better with every track.</p>`,
+      facts: [
+        ["Based in", "Bangalore, India"],
+        ["Studying", "B.Tech, AI & ML"],
+        ["CGPA", "9.01"]
+      ]
+    },
+    skills: {
+      side: "Track 02",
+      title: "Skills",
+      body: `<p>The stuff on heavy rotation right now.</p>`,
+      groups: [
+        ["Core Languages", ["Python", "C++", "C", "JavaScript"]],
+        ["AI / ML", ["NumPy", "Pandas", "Matplotlib", "Seaborn", "scikit-learn"]],
+        ["Web & Databases", ["MongoDB", "Express.js", "React.js", "Node.js", "MySQL", "PostgreSQL"]],
+        ["Tools", ["Git", "GitHub", "npm"]]
+      ]
+    },
+    education: {
+      side: "Track 03",
+      title: "Education",
+      timeline: [
+        { year: "2024–2028", title: "B.Tech, AI & ML", place: "BMS Institute of Technology & Management, Bangalore, Karnataka" },
+        { year: "2022–2023", title: "Higher Secondary", place: "St. Karen's High School, Patna, Bihar" }
+      ],
+      note: "Currently in 5th semester, CGPA 9.01."
+    },
+    hobbies: {
+      side: "Track 04",
+      title: "Hobbies",
+      body: `<p>When I'm not debugging, I'm usually deep into a story someone else built — a game, a film, or a blank sketchbook page. Drawing is the one hobby where nothing has to compile.</p>`,
+      tags: ["Gaming", "Drawing", "Cinema"],
+      facts: [
+        ["Favorite game", "Clair Obscur: Expedition 33"]
+      ]
+    },
+    resume: {
+      side: "Bonus Track",
+      title: "Résumé",
+      body: `<p>Coming soon — check back shortly.</p>`
+    },
+    contact: {
+      side: "Track 06",
+      title: "Contact",
+      body: `<p>Always up for talking ML, internships, or a good movie recommendation.</p>`,
+      links: [
+        ["Email", "mailto:satyamchauhan0322@gmail.com"],
+        ["GitHub", "https://github.com/SatGrid"],
+        ["LinkedIn", "https://www.linkedin.com/in/satyam-chauhan-510326362/"]
+      ]
+    },
+    secret: {
+      side: "Hidden Track",
+      title: "Bonus Track — Unlisted",
+      body: `<p>You found the tape that wasn't supposed to be on the shelf.</p>
+             <p>No project. No skill list. Just a quiet reminder:</p>
+             <p style="margin-top:14px; font-family:'Special Elite', monospace; font-size:17px;">The best tracks are usually the ones nobody asks for.</p>
+             <p style="margin-top:18px; opacity:0.7;">Keep building. Keep breaking things. Keep pressing play.</p>`,
+      note: "— Satyam · Track 00 · Do not rewind"
+    }
+  };
+
+  const overlay = document.getElementById('overlay');
+  const body = document.getElementById('sleeve-body');
+  const closeBtn = document.getElementById('sleeve-close');
+
+  function render(item){
+    let html = `<span class="side-label mono">${item.side}</span><h2 class="type" id="sleeve-title">${item.title}</h2>`;
+    if(item.body){
+      html += `<div class="body-text">${item.body}</div>`;
+    }
+    if(item.groups){
+      html += item.groups.map(g => `
+        <div class="group">
+          <span class="group-label">${g[0]}</span>
+          <div class="tag-row">${g[1].map(t=>`<span>${t}</span>`).join('')}</div>
+        </div>
+      `).join('');
+    }
+    if(item.timeline){
+      html += `<div class="timeline">${item.timeline.map(t => `
+        <div class="timeline-item">
+          <span class="timeline-year mono">${t.year}</span>
+          <h4>${t.title}</h4>
+          <p class="timeline-place">${t.place}</p>
+        </div>
+      `).join('')}</div>`;
+    }
+    if(item.tags){
+      html += `<div class="tag-row" style="margin-top:8px;">${item.tags.map(t=>`<span>${t}</span>`).join('')}</div>`;
+    }
+    if(item.facts){
+      html += `<ul class="fact-list">${item.facts.map(f=>`<li><span>${f[0]}</span><span>${f[1]}</span></li>`).join('')}</ul>`;
+    }
+    if(item.note){
+      html += `<p class="note mono">${item.note}</p>`;
+    }
+    if(item.links){
+      html += `<div class="cta-row">${item.links.map(l=>{
+        const isMail = l[1].startsWith('mailto:');
+        const attrs = isMail ? '' : ' target="_blank" rel="noopener"';
+        return `<a href="${l[1]}"${attrs}>${l[0]} →</a>`;
+      }).join('')}</div>`;
+    }
+    body.innerHTML = html;
+  }
+
+  // ===== SOUND ENGINE (synthesized, no external files) =====
+  let audioCtx = null;
+  let muted = false;
+  let currentWorldTrack = null;
+
+  function ensureAudio(){
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function playTone(freq, duration, type, vol, startFreq){
+    if(muted) return;
+    ensureAudio();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type || 'triangle';
+    const t0 = audioCtx.currentTime;
+    if(startFreq){
+      osc.frequency.setValueAtTime(startFreq, t0);
+      osc.frequency.exponentialRampToValueAtTime(freq, t0 + duration * 0.8);
+    } else {
+      osc.frequency.value = freq;
+    }
+    gain.gain.setValueAtTime(vol, t0);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(t0);
+    osc.stop(t0 + duration);
+  }
+
+  function playNoiseClick(duration, vol, filterFreq){
+    if(muted) return;
+    ensureAudio();
+    const size = Math.max(1, Math.floor(audioCtx.sampleRate * duration));
+    const buffer = audioCtx.createBuffer(1, size, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i = 0; i < size; i++){
+      data[i] = (Math.random() * 2 - 1) * (1 - i / size);
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = filterFreq || 1800;
+    filter.Q.value = 0.9;
+    const gain = audioCtx.createGain();
+    const t0 = audioCtx.currentTime;
+    gain.gain.setValueAtTime(vol, t0);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+    noise.start(t0);
+    noise.stop(t0 + duration);
+  }
+
+  const vuBars = document.querySelectorAll('#vu-meter span');
+  let vuResetTimer = null;
+  function pulseVU(intensity){
+    vuBars.forEach(b => { b.style.height = `${20 + Math.random() * (intensity || 70)}%`; });
+    clearTimeout(vuResetTimer);
+    vuResetTimer = setTimeout(()=>{ vuBars.forEach(b => b.style.height = '20%'); }, 140);
+  }
+
+  function playHoverTick(){ playNoiseClick(0.025, 0.05, 3200); pulseVU(30); }
+  function playPickup(){
+    playNoiseClick(0.05, 0.2, 2000);
+    playTone(180, 0.09, 'sine', 0.07);
+    pulseVU(55);
+  }
+  function playInsert(){
+    playNoiseClick(0.07, 0.3, 1400);
+    playTone(80, 0.18, 'triangle', 0.16, 220);
+    pulseVU(90);
+  }
+  function playEject(){
+    playNoiseClick(0.05, 0.22, 2200);
+    playTone(300, 0.12, 'triangle', 0.13, 150);
+    pulseVU(70);
+  }
+  function playRewind(){
+    // descending whirly rewind sound
+    playNoiseClick(0.35, 0.18, 900);
+    playTone(420, 0.45, 'sawtooth', 0.09, 180);
+    playTone(280, 0.4, 'triangle', 0.07, 90);
+    pulseVU(80);
+  }
+
+  const muteBtn = document.getElementById('mute-toggle');
+  muteBtn.addEventListener('click', ()=>{
+    muted = !muted;
+    muteBtn.textContent = muted ? '♪ SOUND: OFF' : '♪ SOUND: ON';
+    muteBtn.setAttribute('aria-pressed', String(muted));
+    if(currentWorldTrack) currentWorldTrack.muted = muted;
+    if(!muted) ensureAudio();
+  });
+
+  // ===== SECRET BONUS TRACK (click VU meter 5 times quickly) =====
+  const vuMeter = document.getElementById('vu-meter');
+  let vuClicks = [];
+  const VU_CLICK_WINDOW = 1800; // ms
+  const VU_NEEDED = 5;
+
+  vuMeter.style.cursor = 'pointer';
+  vuMeter.title = ''; // keep it secret
+
+  vuMeter.addEventListener('click', ()=>{
+    const now = Date.now();
+    vuClicks = vuClicks.filter(t => now - t < VU_CLICK_WINDOW);
+    vuClicks.push(now);
+
+    // visual feedback on the bars
+    pulseVU(40 + vuClicks.length * 12);
+    playHoverTick();
+
+    if(vuClicks.length >= VU_NEEDED){
+      vuClicks = [];
+      openSecretTrack();
+    }
+  });
+
+  function openSecretTrack(){
+    // little celebration sound
+    [220, 277, 330, 440].forEach((f, i)=>{
+      setTimeout(()=> playTone(f, 0.16, 'triangle', 0.11), i * 80);
+    });
+    pulseVU(100);
+
+    // close any open tape first
+    if(overlay.classList.contains('open')){
+      closeOverlay();
+    }
+
+    setTimeout(()=>{
+      render(data.secret);
+      overlay.classList.add('open');
+      playInsert();
+      startPlayer();
+      closeBtn.focus();
+
+      // special toast
+      showEggToast('🎙 HIDDEN TRACK UNLOCKED — you were never supposed to find this');
+    }, 180);
+  }
+
+  // build real 3D box faces: move existing content into a front face, add right/top edges
+  document.querySelectorAll('.tape').forEach(tape=>{
+    const front = document.createElement('div');
+    front.className = 'face front';
+    while(tape.firstChild){ front.appendChild(tape.firstChild); }
+    const gloss = document.createElement('div');
+    gloss.className = 'gloss';
+    front.appendChild(gloss);
+    const right = document.createElement('div');
+    right.className = 'face right';
+    const top = document.createElement('div');
+    top.className = 'face top';
+    tape.appendChild(front);
+    tape.appendChild(right);
+    tape.appendChild(top);
+    tape.draggable = true;
+  });
+
+  // drag-and-drop reordering
+  let draggedTape = null;
+  let wasDragging = false;
+  const shelfEl = document.getElementById('shelf');
+  document.querySelectorAll('.tape').forEach(tape=>{
+    tape.addEventListener('dragstart', (e)=>{
+      draggedTape = tape;
+      wasDragging = true;
+      tape.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try{ e.dataTransfer.setData('text/plain', tape.dataset.item); }catch(err){}
+    });
+    tape.addEventListener('dragend', ()=>{
+      tape.classList.remove('dragging');
+      setTimeout(()=>{ wasDragging = false; }, 60);
+    });
+    tape.addEventListener('dragover', (e)=>{ e.preventDefault(); });
+    tape.addEventListener('drop', (e)=>{
+      e.preventDefault();
+      if(!draggedTape || draggedTape === tape) return;
+      const tapesArr = [...shelfEl.children];
+      const draggedIndex = tapesArr.indexOf(draggedTape);
+      const targetIndex = tapesArr.indexOf(tape);
+      if(draggedIndex < targetIndex){ tape.after(draggedTape); } else { tape.before(draggedTape); }
+      playNoiseClick(0.05, 0.18, 2600);
+      pulseVU(45);
+    });
+  });
+
+  // tilt-toward-cursor effect for realism
+  document.querySelectorAll('.tape').forEach(tape=>{
+    tape.addEventListener('mouseenter', ()=>{
+      if(!tape.classList.contains('picked')) playHoverTick();
+    });
+    tape.addEventListener('mousemove', (e)=>{
+      if(tape.classList.contains('picked')) return;
+      const r = tape.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      tape.style.transform = `rotateY(${x * 20}deg) rotateX(${-y * 20}deg) translateZ(24px)`;
+      const blur = 20 + Math.abs(x)*14 + Math.abs(y)*10;
+      tape.style.boxShadow = `3px 3px 0 var(--ink), ${x*26}px ${20 + y*14}px ${blur}px rgba(43,38,32,0.32)`;
+      tape.style.setProperty('--gx', `${(x+0.5)*100}%`);
+      tape.style.setProperty('--gy', `${(y+0.5)*100}%`);
+      const magnitude = Math.min(1, Math.sqrt(x*x + y*y) * 2.2);
+      const spinDuration = Math.max(0.35, 2.2 - magnitude * 1.85);
+      tape.querySelectorAll('.reel').forEach(reel=>{
+        reel.style.animation = `spin ${spinDuration}s linear infinite`;
+      });
+    });
+    tape.addEventListener('mouseleave', ()=>{
+      if(tape.classList.contains('picked')) return;
+      tape.style.transform = '';
+      tape.style.boxShadow = '';
+      tape.querySelectorAll('.reel').forEach(reel=>{ reel.style.animation = ''; });
+    });
+    tape.addEventListener('click', ()=>{
+      if(wasDragging) return;
+      const key = tape.getAttribute('data-item');
+      tape.style.transform = '';
+      tape.style.boxShadow = '';
+      tape.classList.add('picked');
+      playPickup();
+      setTimeout(()=>{
+        render(data[key]);
+        overlay.classList.add('open');
+        playInsert();
+        startPlayer();
+        closeBtn.focus();
+      }, 160);
+    });
+  });
+
+  // ===== MINI PLAYER (inside modal) =====
+  const counterEl = document.getElementById('tape-counter');
+  const playPauseBtn = document.getElementById('play-pause-btn');
+  const miniReels = document.querySelectorAll('#mini-reel-1, #mini-reel-2');
+  let playerInterval = null;
+  let counterVal = 0;
+  let isPlaying = true;
+
+  function setMiniReelSpin(playing){
+    miniReels.forEach(r=>{
+      r.style.animation = playing ? 'spin 1.4s linear infinite' : 'none';
+    });
+  }
+  function startPlayer(){
+    counterVal = 0;
+    isPlaying = true;
+    playPauseBtn.textContent = '⏸ PAUSE';
+    counterEl.textContent = '0000';
+    clearInterval(playerInterval);
+    playerInterval = setInterval(()=>{
+      if(isPlaying){
+        counterVal = (counterVal + 3) % 10000;
+        counterEl.textContent = String(counterVal).padStart(4, '0');
+      }
+    }, 150);
+    setMiniReelSpin(true);
+  }
+  function stopPlayer(){
+    clearInterval(playerInterval);
+    setMiniReelSpin(false);
+  }
+  playPauseBtn.addEventListener('click', ()=>{
+    isPlaying = !isPlaying;
+    playPauseBtn.textContent = isPlaying ? '⏸ PAUSE' : '▶ PLAY';
+    setMiniReelSpin(isPlaying);
+    playHoverTick();
+  });
+
+  function closeOverlay(){
+    playEject();
+    stopPlayer();
+    overlay.classList.remove('open');
+    document.querySelectorAll('.tape.picked').forEach(t=>t.classList.remove('picked'));
+  }
+  closeBtn.addEventListener('click', closeOverlay);
+  overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeOverlay(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeOverlay(); });
+
+  // ===== IDLE WIGGLE =====
+  let idleTimer = null;
+  function scheduleIdleWiggle(){
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(triggerIdleWiggle, 6000);
+  }
+  function triggerIdleWiggle(){
+    if(overlay.classList.contains('open')){ scheduleIdleWiggle(); return; }
+    const tapes = [...document.querySelectorAll('.tape:not(.picked)')];
+    if(tapes.length){
+      const t = tapes[Math.floor(Math.random() * tapes.length)];
+      const front = t.querySelector('.face.front');
+      front.classList.add('idle-wiggle');
+      setTimeout(()=> front.classList.remove('idle-wiggle'), 700);
+    }
+    scheduleIdleWiggle();
+  }
+  ['mousemove','keydown','click','touchstart'].forEach(evt=>{
+    document.addEventListener(evt, scheduleIdleWiggle, { passive: true });
+  });
+  scheduleIdleWiggle();
+
+  // ===== EASTER EGG (Konami code) =====
+  const konamiSeq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+  let konamiPos = 0;
+  document.addEventListener('keydown', (e)=>{
+    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if(key === konamiSeq[konamiPos]){
+      konamiPos++;
+      if(konamiPos === konamiSeq.length){
+        triggerEasterEgg();
+        konamiPos = 0;
+      }
+    } else {
+      konamiPos = (key === konamiSeq[0]) ? 1 : 0;
+    }
+  });
+  function triggerEasterEgg(){
+    const flash = document.createElement('div');
+    flash.className = 'flicker-flash';
+    document.body.appendChild(flash);
+    setTimeout(()=> flash.remove(), 400);
+
+    [261, 329, 392, 523].forEach((f, i)=>{
+      setTimeout(()=> playTone(f, 0.18, 'triangle', 0.12), i * 90);
+    });
+    pulseVU(100);
+
+    const toast = document.createElement('div');
+    toast.className = 'egg-toast mono';
+    toast.textContent = '🎬 SECRET TRACK FOUND — Achievement Unlocked: Button Masher';
+    document.body.appendChild(toast);
+    requestAnimationFrame(()=> toast.classList.add('show'));
+    setTimeout(()=>{
+      toast.classList.remove('show');
+      setTimeout(()=> toast.remove(), 400);
+    }, 3200);
+  }
+
+  // ===== EASTER EGG 2: Be Kind Rewind (persistent mode) =====
+  // Type "rewind" to enter · type "virtuose" to restore
+  // Also detects "theworld" for Made in Heaven
+  let typedBuffer = '';
+  let isRewinding = false;
+  let isHeaven = false;
+  let savedSideText = 'SIDE A · 2026';
+
+  document.addEventListener('keydown', (e)=>{
+    if(e.target.matches('input, textarea, [contenteditable]')) return;
+    if(e.key.length !== 1 || e.ctrlKey || e.metaKey || e.altKey) return;
+
+    typedBuffer = (typedBuffer + e.key.toLowerCase()).slice(-12);
+
+    if(!isRewinding && !isHeaven && typedBuffer.endsWith('rewind')){
+      enterRewindMode();
+      typedBuffer = '';
+    } else if(isRewinding && typedBuffer.endsWith('virtuose')){
+      exitRewindMode();
+      typedBuffer = '';
+    } else if(!isHeaven && typedBuffer.endsWith('theworld')){
+      triggerTheWorld();
+      typedBuffer = '';
+    }
+  });
+
+  function enterRewindMode(){
+    if(isRewinding) return;
+    isRewinding = true;
+    playRewind();
+
+    const sideToggle = document.getElementById('side-toggle');
+    savedSideText = sideToggle.textContent;
+    sideToggle.textContent = 'SIDE B · REWOUND';
+
+    document.body.classList.add('rewind-mode');
+    document.querySelectorAll('.tape').forEach(t => t.classList.add('rewinding'));
+
+    showEggToast('⏪ REWIND MODE — type “virtuose” to restore');
+  }
+
+  function exitRewindMode(){
+    if(!isRewinding) return;
+    isRewinding = false;
+
+    // soft restore sound
+    playTone(320, 0.2, 'triangle', 0.1, 140);
+    playNoiseClick(0.06, 0.15, 1800);
+    pulseVU(55);
+
+    const sideToggle = document.getElementById('side-toggle');
+    sideToggle.textContent = savedSideText;
+
+    document.body.classList.remove('rewind-mode');
+    document.querySelectorAll('.tape').forEach(t => t.classList.remove('rewinding'));
+
+    showEggToast('▶ VIRTUOSE — restored to normal');
+  }
+
+  function showEggToast(message){
+    // remove any existing toast first
+    document.querySelectorAll('.egg-toast').forEach(t => t.remove());
+
+    const toast = document.createElement('div');
+    toast.className = 'egg-toast mono';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    requestAnimationFrame(()=> toast.classList.add('show'));
+
+    setTimeout(()=>{
+      toast.classList.remove('show');
+      setTimeout(()=> toast.remove(), 350);
+    }, 3400);
+  }
+
+  // ===== EASTER EGG 3: THE WORLD / MADE IN HEAVEN =====
+  // Synced to the real structure of the track: build-up runs until the line
+  // finishes (9.97s), everything freezes dead in that pause, then the reset
+  // rides the track's remaining pauses (12.58s, 14.77s) through to the end.
+  function playCymbalHit(){
+    playNoiseClick(0.9, 0.28, 6000);
+  }
+  function playGlitchTick(){
+    playNoiseClick(0.04, 0.12, 4200);
+  }
+
+  function triggerTheWorld(){
+    if(isHeaven) return;
+    isHeaven = true;
+    if(overlay.classList.contains('open')) closeOverlay();
+
+    const FREEZE_AT = 9.97;   // line finishes, pause begins — hard freeze
+    const STUTTER_AT = 12.58; // next structural pause — glitch pulse
+    const FLASH_AT = 14.77;   // final pause before track ends — the flash
+
+    document.body.classList.add('heaven-mode');
+    document.documentElement.style.setProperty('--shake-amp', '0px');
+
+    const vignette = document.createElement('div');
+    vignette.className = 'dread-vignette';
+    document.body.appendChild(vignette);
+
+    showEggToast('✧ MADE IN HEAVEN — time accelerates');
+
+    const track = new Audio('audio/made-in-heaven.mp3');
+    track.volume = 0.85;
+    track.muted = muted;
+    currentWorldTrack = track;
+
+    const fallbackDurationSec = 16.1; // used only if the file fails to load
+    let rafId = null;
+    let frozen = false, stuttered = false, flashed = false, finished = false;
+
+    // build-up: escalates only until the freeze point, not the full track
+    function animateChaos(){
+      if(frozen || finished) return;
+      const progress = Math.min(1, track.currentTime / FREEZE_AT);
+      const eased = progress * progress;
+
+      document.documentElement.style.setProperty('--shake-amp', `${eased * 7}px`);
+      vignette.style.opacity = String(eased * 0.9);
+
+      const spinSpeed = 2.6 - eased * 2.3;
+      const reelSpeed = 1.1 - eased * 0.98;
+      document.querySelectorAll('body.heaven-mode .tape').forEach(t=>{
+        t.style.animationDuration = `${spinSpeed}s`;
+      });
+      document.querySelectorAll('body.heaven-mode .tape .reel').forEach(r=>{
+        r.style.animationDuration = `${Math.max(0.09, reelSpeed)}s`;
+      });
+
+      rafId = requestAnimationFrame(animateChaos);
+    }
+
+    // hard freeze — everything stops dead, no flourish, no text
+    function doFreeze(){
+      if(frozen) return;
+      frozen = true;
+      cancelAnimationFrame(rafId);
+      document.body.classList.add('frozen-frame');
+      vignette.remove();
+    }
+
+    // brief glitch pulse mid-pause — reality straining, not breaking yet
+    function doStutter(){
+      if(stuttered) return;
+      stuttered = true;
+      playGlitchTick();
+      const g = document.createElement('div');
+      g.className = 'freeze-glitch pulse';
+      document.body.appendChild(g);
+      setTimeout(()=> g.remove(), 400);
+    }
+
+    function doRealityBreak(){
+      if(flashed) return;
+      flashed = true;
+      document.body.classList.remove('frozen-frame', 'heaven-mode');
+      document.documentElement.style.setProperty('--shake-amp', '0px');
+
+      const reset = document.createElement('div');
+      reset.className = 'reality-break';
+      reset.innerHTML = `<div class="burst"></div><div class="grain"></div><div class="flash"></div>`;
+      document.body.appendChild(reset);
+      requestAnimationFrame(()=> reset.classList.add('active'));
+      playCymbalHit();
+
+      setTimeout(()=>{
+        const flash = reset.querySelector('.flash');
+        flash.style.transition = 'opacity 0.18s ease';
+        flash.style.opacity = '1';
+        setTimeout(()=> flash.style.opacity = '0', 220);
+      }, 120);
+
+      reset.dataset.el = 'active';
+      window.__realityBreakEl = reset;
+    }
+
+    function restore(){
+      if(finished) return;
+      finished = true;
+      const reset = window.__realityBreakEl;
+      playTone(220, 0.5, 'sine', 0.08, 110);
+      if(reset){
+        reset.classList.remove('active');
+        setTimeout(()=>{
+          reset.remove();
+          isHeaven = false;
+          currentWorldTrack = null;
+          showEggToast('▶ New universe. Tapes restored.');
+        }, 600);
+      } else {
+        isHeaven = false;
+        currentWorldTrack = null;
+        showEggToast('▶ New universe. Tapes restored.');
+      }
+    }
+
+    track.addEventListener('timeupdate', ()=>{
+      const t = track.currentTime;
+      if(!frozen && t >= FREEZE_AT) doFreeze();
+      if(frozen && !stuttered && t >= STUTTER_AT) doStutter();
+      if(stuttered && !flashed && t >= FLASH_AT) doRealityBreak();
+    });
+    track.addEventListener('ended', restore);
+    track.addEventListener('error', ()=>{
+      // file missing or failed to decode — still run the sequence on a timer
+      setTimeout(doFreeze, FREEZE_AT * 1000);
+      setTimeout(doStutter, STUTTER_AT * 1000);
+      setTimeout(doRealityBreak, FLASH_AT * 1000);
+      setTimeout(restore, fallbackDurationSec * 1000);
+    });
+
+    track.play()
+      .then(()=>{ rafId = requestAnimationFrame(animateChaos); })
+      .catch(()=>{
+        // autoplay blocked — run the visuals on fallback timers regardless
+        rafId = requestAnimationFrame(animateChaos);
+        setTimeout(doFreeze, FREEZE_AT * 1000);
+        setTimeout(doStutter, STUTTER_AT * 1000);
+        setTimeout(doRealityBreak, FLASH_AT * 1000);
+        setTimeout(restore, fallbackDurationSec * 1000);
+      });
+  }
+
+  // ===== SIDE A/B FLIP =====
+  const sideToggle = document.getElementById('side-toggle');
+  const paletteClasses = ['c-rust','c-olive','c-denim','c-mustard','c-plum','c-sage'];
+  let sideFlipped = false;
+  sideToggle.addEventListener('click', ()=>{
+    sideFlipped = !sideFlipped;
+    sideToggle.textContent = sideFlipped ? 'SIDE B · 2026' : 'SIDE A · 2026';
+
+    const tapesArr = [...shelfEl.children];
+    for(let i = tapesArr.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [tapesArr[i], tapesArr[j]] = [tapesArr[j], tapesArr[i]];
+    }
+    tapesArr.forEach(t=> shelfEl.appendChild(t));
+
+    const shuffledPalette = [...paletteClasses];
+    for(let i = shuffledPalette.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledPalette[i], shuffledPalette[j]] = [shuffledPalette[j], shuffledPalette[i]];
+    }
+    tapesArr.forEach((t, i)=>{
+      paletteClasses.forEach(c=> t.classList.remove(c));
+      t.classList.add(shuffledPalette[i % shuffledPalette.length]);
+    });
+
+    playNoiseClick(0.09, 0.25, 900);
+    playTone(400, 0.2, 'triangle', 0.12, 200);
+    pulseVU(60);
+  });
+</script>
+
+</body>
+</html>
